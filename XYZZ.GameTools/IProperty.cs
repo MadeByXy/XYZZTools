@@ -1,96 +1,9 @@
-﻿using System;
-using System.Drawing;
-
-namespace XYZZ.GameTools
+﻿namespace XYZZ.GameTools
 {
-    /// <summary>
-    /// 几率属性抽象类
-    /// </summary>
-    public abstract class RateProperty<T> : IProperty<T>
-    {
-        /// <summary>
-        /// 属性显示信息
-        /// </summary>
-        public ShowInfo PropertyInfo { get; protected set; }
-
-        /// <summary>
-        /// 原始属性值
-        /// </summary>
-        public T PropertyValue { get; protected set; }
-
-        /// <summary>
-        /// 永久增益
-        /// </summary>
-        /// <param name="addedValue">增益值</param>
-        public abstract void Buff(T addedValue);
-
-        /// <summary>
-        /// 限时增益
-        /// </summary>
-        /// <param name="addedValue">增益值</param>
-        /// <param name="millisecond">增益时间</param>
-        public abstract void Buff(T addedValue, int millisecond);
-
-        /// <summary>
-        /// 清除所有减益效果
-        /// </summary>
-        public abstract void Clear();
-
-        /// <summary>
-        /// 清除所有效果
-        /// </summary>
-        public abstract void ClearAll();
-
-        /// <summary>
-        /// 返回随机结果
-        /// </summary>
-        /// <returns></returns>
-        public abstract bool IsSuccess();
-    }
-
-    /// <summary>
-    /// 数值属性抽象类
-    /// </summary>
-    public abstract class ValueProperty<T> : IProperty<T>
-    {
-        /// <summary>
-        /// 属性显示信息
-        /// </summary>
-        public ShowInfo PropertyInfo { get; protected set; }
-
-        /// <summary>
-        /// 原始属性值
-        /// </summary>
-        public T PropertyValue { get; protected set; }
-
-        /// <summary>
-        /// 永久增益
-        /// </summary>
-        /// <param name="addedValue">增益值</param>
-        public abstract void Buff(T addedValue);
-
-        /// <summary>
-        /// 限时增益
-        /// </summary>
-        /// <param name="addedValue">增益值</param>
-        /// <param name="millisecond">增益时间</param>
-        public abstract void Buff(T addedValue, int millisecond);
-
-        /// <summary>
-        /// 清除所有减益效果
-        /// </summary>
-        public abstract void Clear();
-
-        /// <summary>
-        /// 清除所有效果
-        /// </summary>
-        public abstract void ClearAll();
-    }
-
     /// <summary>
     /// 属性接口
     /// </summary>
-  public  interface IProperty<T>
+    public  interface IProperty<T>
     {
         /// <summary>
         /// 属性显示信息
@@ -118,12 +31,8 @@ namespace XYZZ.GameTools
         /// <summary>
         /// 清除所有减益效果
         /// </summary>
-        void Clear();
-
-        /// <summary>
-        /// 清除所有效果
-        /// </summary>
-        void ClearAll();
+        /// <param name="clearMode">清除模式</param>
+        void Clear(ClearModeEnum clearMode);
     }
 
     /// <summary>
@@ -138,13 +47,32 @@ namespace XYZZ.GameTools
         /// <summary>
         /// 属性状态
         /// </summary>
-        public PropertyEnum Status { get; set; }
+        public PropertyStatusEnum Status { get; set; }
+    }
+
+    /// <summary>
+    /// 清除模式
+    /// </summary>
+    public enum ClearModeEnum
+    {
+        /// <summary>
+        /// 清除所有
+        /// </summary>
+        All,
+        /// <summary>
+        /// 清除增益效果
+        /// </summary>
+        Buff,
+        /// <summary>
+        /// 清除减益效果
+        /// </summary>
+        Debuff
     }
 
     /// <summary>
     /// 属性状态枚举
     /// </summary>
-    public enum PropertyEnum
+    public enum PropertyStatusEnum
     {
         /// <summary>
         /// 正常

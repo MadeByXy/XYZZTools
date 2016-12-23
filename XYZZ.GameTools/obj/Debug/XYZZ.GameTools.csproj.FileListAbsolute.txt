@@ -1,0 +1,10 @@
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\obj\Debug\XYZZ.GameTools.csprojResolveAssemblyReference.cache
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\XYZZ.GameTools.dll
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\XYZZ.GameTools.pdb
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\XYZZ.Tools.dll
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\Newtonsoft.Json.dll
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\XYZZ.Tools.pdb
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\XYZZ.Tools.xml
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\obj\Debug\XYZZ.GameTools.dll
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\obj\Debug\XYZZ.GameTools.pdb
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.GameTools\bin\Debug\XYZZ.GameTools.XML

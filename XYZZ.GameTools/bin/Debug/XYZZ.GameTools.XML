@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>XYZZ.GameTools</name>
+    </assembly>
+    <members>
+        <member name="T:XYZZ.GameTools.IProperty`1">
+            <summary>
+            属性接口
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.IProperty`1.PropertyInfo">
+            <summary>
+            属性显示信息
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.IProperty`1.PropertyValue">
+            <summary>
+            原始属性值
+            </summary>
+        </member>
+        <member name="M:XYZZ.GameTools.IProperty`1.Buff(`0)">
+            <summary>
+            永久增益
+            </summary>
+            <param name="addedValue">增益值</param>
+        </member>
+        <member name="M:XYZZ.GameTools.IProperty`1.Buff(`0,System.Int32)">
+            <summary>
+            限时增益
+            </summary>
+            <param name="addedValue">增益值</param>
+            <param name="millisecond">增益时间</param>
+        </member>
+        <member name="M:XYZZ.GameTools.IProperty`1.Clear(XYZZ.GameTools.ClearModeEnum)">
+            <summary>
+            清除所有减益效果
+            </summary>
+            <param name="clearMode">清除模式</param>
+        </member>
+        <member name="T:XYZZ.GameTools.ShowInfo">
+            <summary>
+            显示信息
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.ShowInfo.Text">
+            <summary>
+            显示文字
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.ShowInfo.Status">
+            <summary>
+            属性状态
+            </summary>
+        </member>
+        <member name="T:XYZZ.GameTools.ClearModeEnum">
+            <summary>
+            清除模式
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.ClearModeEnum.All">
+            <summary>
+            清除所有
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.ClearModeEnum.Buff">
+            <summary>
+            清除增益效果
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.ClearModeEnum.Debuff">
+            <summary>
+            清除减益效果
+            </summary>
+        </member>
+        <member name="T:XYZZ.GameTools.PropertyStatusEnum">
+            <summary>
+            属性状态枚举
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.PropertyStatusEnum.Normal">
+            <summary>
+            正常
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.PropertyStatusEnum.Buff">
+            <summary>
+            增益
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.PropertyStatusEnum.Debuff">
+            <summary>
+            减益
+            </summary>
+        </member>
+        <member name="T:XYZZ.GameTools.RateProperty">
+            <summary>
+            几率类型属性
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.RateProperty.OriginalValue">
+            <summary>
+            原始值
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.RateProperty.CompensationValue">
+            <summary>
+            补偿值
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.RateProperty.BuffValue">
+            <summary>
+            增益值
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.RateProperty.DebuffValue">
+            <summary>
+            减益值
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.RateProperty.BuffCancel">
+            <summary>
+            增益取消标记
+            </summary>
+        </member>
+        <member name="F:XYZZ.GameTools.RateProperty.DebuffCancel">
+            <summary>
+            减益取消标记
+            </summary>
+        </member>
+        <member name="M:XYZZ.GameTools.RateProperty.#ctor(System.Double)">
+            <summary>
+            实例化
+            </summary>
+            <param name="value">几率数值(0~1)</param>
+        </member>
+        <member name="P:XYZZ.GameTools.RateProperty.PropertyInfo">
+            <summary>
+            属性显示信息
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.RateProperty.PropertyValue">
+            <summary>
+            概率值
+            </summary>
+        </member>
+        <member name="M:XYZZ.GameTools.RateProperty.SetPropertyInfo">
+            <summary>
+            设定属性显示信息
+            </summary>
+        </member>
+        <member name="M:XYZZ.GameTools.RateProperty.Buff(System.Double)">
+            <summary>
+            永久增益
+            </summary>
+            <param name="addedValue">增益值</param>
+        </member>
+        <member name="M:XYZZ.GameTools.RateProperty.Buff(System.Double,System.Int32)">
+            <summary>
+            限时增益
+            </summary>
+            <param name="addedValue">增益概率(-1~1)</param>
+            <param name="millisecond">增益时间</param>
+        </member>
+        <member name="M:XYZZ.GameTools.RateProperty.Clear(XYZZ.GameTools.ClearModeEnum)">
+            <summary>
+            清除所有减益效果
+            </summary>
+            <param name="clearMode">清除模式</param>
+        </member>
+        <member name="M:XYZZ.GameTools.RateProperty.IsSuccess">
+            <summary>
+            返回随机结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:XYZZ.GameTools.ValueProperty">
+            <summary>
+            值类型属性
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.ValueProperty.PropertyInfo">
+            <summary>
+            属性显示信息
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.ValueProperty.PropertyValue">
+            <summary>
+            原始属性值
+            </summary>
+        </member>
+        <member name="M:XYZZ.GameTools.ValueProperty.Buff(System.Double)">
+            <summary>
+            永久增益
+            </summary>
+            <param name="addedValue">增益值</param>
+        </member>
+        <member name="M:XYZZ.GameTools.ValueProperty.Buff(System.Double,System.Int32)">
+            <summary>
+            限时增益
+            </summary>
+            <param name="addedValue">增益值</param>
+            <param name="millisecond">增益时间</param>
+        </member>
+        <member name="M:XYZZ.GameTools.ValueProperty.Clear(XYZZ.GameTools.ClearModeEnum)">
+            <summary>
+            清除所有减益效果
+            </summary>
+            <param name="clearMode">清除模式</param>
+        </member>
+        <member name="T:XYZZ.GameTools.StableRandom">
+            <summary>
+            稳定随机
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.StableRandom.OrginalRate">
+            <summary>
+            原始几率
+            </summary>
+        </member>
+        <member name="P:XYZZ.GameTools.StableRandom.ThisRate">
+            <summary>
+            当前几率
+            </summary>
+        </member>
+        <member name="M:XYZZ.GameTools.StableRandom.#ctor(System.Double)">
+            <summary>
+            实例化随机数
+            </summary>
+            <param name="rate">成功几率(0~1)</param>
+        </member>
+        <member name="M:XYZZ.GameTools.StableRandom.AddRate(System.Double,System.Int32)">
+            <summary>
+            限时增加概率
+            </summary>
+            <param name="rate">增加的几率</param>
+            <param name="second">时间(秒)</param>
+        </member>
+        <member name="M:XYZZ.GameTools.StableRandom.IsSuccess">
+            <summary>
+            返回是否成功
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
