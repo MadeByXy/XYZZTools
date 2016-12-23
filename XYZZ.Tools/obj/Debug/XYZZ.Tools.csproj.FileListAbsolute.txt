@@ -1,0 +1,7 @@
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\bin\Debug\XYZZ.Tools.dll
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\bin\Debug\XYZZ.Tools.pdb
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\obj\Debug\XYZZ.Tools.dll
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\obj\Debug\XYZZ.Tools.pdb
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\bin\Debug\Newtonsoft.Json.dll
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\bin\Debug\XYZZ.Tools.XML
+E:\小雨制造\XYZZ.Tools\XYZZ.Tools\obj\Debug\XYZZ.Tools.csprojResolveAssemblyReference.cache
