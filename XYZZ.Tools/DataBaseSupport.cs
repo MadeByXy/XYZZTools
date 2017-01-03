@@ -17,7 +17,7 @@ namespace XYZZ.Tools
         public static List<string> GetLibraryFromTable(string tableName, bool containsData)
         {
             List<string> libraryList = new List<string>();
-            DataTable data = DataBase.ExecuteSql<DataTable>("select USERNAME from all_users");
+            DataTable data = DataBase.ExecuteSql<DataTable>("select username from all_users");
             foreach (DataRow row in data.Rows)
             {
                 try
@@ -42,13 +42,13 @@ namespace XYZZ.Tools
         public static List<string> GetLibraryFromSQL(string sql, bool containsData)
         {
             List<string> libraryList = new List<string>();
-            DataTable data = DataBase.ExecuteSql<DataTable>("select USERNAME from all_users");
+            DataTable data = DataBase.ExecuteSql<DataTable>("select username from all_users");
             foreach (DataRow row in data.Rows)
             {
                 try
                 {
                     if (DataBase.ExecuteSql<bool>(
-                        Regex.Replace(sql, "(from )(|[a-z_0-9]*\\.)+([a-z_0-9\"]{1,})", string.Format("$1{0}.$3", row[0]), RegexOptions.IgnoreCase)) ||
+                        Regex.Replace(sql, "(from |join )(|[a-z_0-9\"]*\\.)+([a-z_0-9\"]{1,})", string.Format("$1{0}.$3", row[0]), RegexOptions.IgnoreCase)) ||
                         !containsData)
                     {
                         libraryList.Add(row[0].ToString());

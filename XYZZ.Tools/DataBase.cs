@@ -47,6 +47,7 @@ namespace XYZZ.Tools
         /// <see cref="DataBase"/>的实例
         /// </summary>
         public static DataBase Instance = new DataBase();
+
         private DataBase()
         {
             try
@@ -55,10 +56,12 @@ namespace XYZZ.Tools
                 SetConn(ConnectionString);
 
                 //延迟关闭，避免多次重复开关数据库
-                SwitchTimer = new Timer();
-                SwitchTimer.Interval = 1000;
+                SwitchTimer = new Timer()
+                {
+                    Interval = 1000,
+                    AutoReset = false
+                };
                 SwitchTimer.Elapsed += new ElapsedEventHandler((object sender, ElapsedEventArgs e) => { Close(); });
-                SwitchTimer.AutoReset = false;
             }
             catch { }
         }
@@ -67,7 +70,6 @@ namespace XYZZ.Tools
         {
             SwitchTimer.Stop();
             SwitchTimer.Start();
-            Open();
         }
 
         /// <summary>
@@ -81,7 +83,6 @@ namespace XYZZ.Tools
         public static T ExecuteSql<T>(string sql, params object[] args)
         {
             sql = string.Format(sql, args);
-            TimerStart();
             DataTable tempDataTable;
             switch (typeof(T).Name)
             {
@@ -123,7 +124,6 @@ namespace XYZZ.Tools
         public static void ExecuteSql(string sql, params object[] args)
         {
             sql = string.Format(sql, args);
-            TimerStart();
             ExcuteNonQuery(sql);
         }
 
@@ -131,6 +131,7 @@ namespace XYZZ.Tools
         {
             try
             {
+                Open();
                 DbCommand dbCommand = Conn.CreateCommand();
                 dbCommand.CommandText = sql;
                 DataTable dataTable = new DataTable();
@@ -143,22 +144,33 @@ namespace XYZZ.Tools
                         new SqlDataAdapter((SqlCommand)dbCommand).Fill(dataTable);
                         break;
                 }
+                TimerStart();
                 return dataTable;
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e)
+            {
+                Close();
+                throw e;
+            }
         }
 
         private static int ExcuteNonQuery(string sql)
         {
             try
             {
+                Open();
                 DbCommand dbCommand;
                 dbCommand = Conn.CreateCommand();
                 dbCommand.CommandText = sql;
                 int result = dbCommand.ExecuteNonQuery();
+                TimerStart();
                 return result;
             }
-            catch (Exception e) { throw e; }
+            catch (Exception e)
+            {
+                Close();
+                throw e;
+            }
         }
 
         private static void Open()
