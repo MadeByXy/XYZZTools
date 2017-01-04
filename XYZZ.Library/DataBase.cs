@@ -4,9 +4,10 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Timers;
-using Config = System.Configuration.ConfigurationManager;
+using Config = System.Configuration.ConfigurationSettings;
+#pragma warning disable 0618
 
-namespace XYZZ.Tools
+namespace XYZZ.Library
 {
     /// <summary>
     /// 数据库操作类
@@ -68,8 +69,13 @@ namespace XYZZ.Tools
 
         private static void TimerStart()
         {
-            SwitchTimer.Stop();
             SwitchTimer.Start();
+        }
+
+        private static void TimerStop()
+        {
+            SwitchTimer.Stop();
+            Open();
         }
 
         /// <summary>
@@ -131,7 +137,7 @@ namespace XYZZ.Tools
         {
             try
             {
-                Open();
+                TimerStop();
                 DbCommand dbCommand = Conn.CreateCommand();
                 dbCommand.CommandText = sql;
                 DataTable dataTable = new DataTable();
@@ -158,7 +164,7 @@ namespace XYZZ.Tools
         {
             try
             {
-                Open();
+                TimerStop();
                 DbCommand dbCommand;
                 dbCommand = Conn.CreateCommand();
                 dbCommand.CommandText = sql;

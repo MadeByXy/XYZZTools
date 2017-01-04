@@ -2,7 +2,7 @@
 using System.Data;
 using System.Text.RegularExpressions;
 
-namespace XYZZ.Tools
+namespace XYZZ.Library
 {    /// <summary>
      /// 数据库辅助类
      /// </summary>

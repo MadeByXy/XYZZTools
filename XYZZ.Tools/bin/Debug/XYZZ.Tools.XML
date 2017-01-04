@@ -52,58 +52,6 @@
             <param name="text"></param>
             <returns></returns>
         </member>
-        <member name="T:XYZZ.Tools.DataBase">
-            <summary>
-            数据库操作类
-            </summary>
-        </member>
-        <member name="P:XYZZ.Tools.DataBase.ConnectionString">
-            <summary>
-            数据库连接字段
-            </summary>
-        </member>
-        <member name="F:XYZZ.Tools.DataBase.Instance">
-            <summary>
-            <see cref="T:XYZZ.Tools.DataBase"/>的实例
-            </summary>
-        </member>
-        <member name="M:XYZZ.Tools.DataBase.ExecuteSql``1(System.String,System.Object[])">
-            <summary>
-            执行SQL，并返回指定类型的结果
-            <para>T类型说明：</para>
-            <para><see cref="T:System.Int32"/>：查询返回查询行数，其余返回受影响的行数</para>
-            <para><see cref="T:System.String"/>/<see cref="T:System.Decimal"/>：返回第一项数据</para>
-            <para><see cref="T:System.Data.DataTable"/>：返回查询结果</para>
-            <para><see cref="T:System.Boolean"/>：查询返回是否存在目标，其余返回是否存在受影响行</para>
-            </summary>
-        </member>
-        <member name="M:XYZZ.Tools.DataBase.ExecuteSql(System.String,System.Object[])">
-            <summary>
-            执行SQL
-            </summary>
-        </member>
-        <member name="T:XYZZ.Tools.DataBaseSupport">
-            <summary>
-            数据库辅助类
-            </summary>
-        </member>
-        <member name="M:XYZZ.Tools.DataBaseSupport.GetLibraryFromTable(System.String,System.Boolean)">
-            <summary>
-            查询所有含有表名的数据库
-            </summary>
-            <param name="tableName">表名称</param>
-            <param name="containsData">是否必须含有数据</param>
-            <returns></returns>
-        </member>
-        <member name="M:XYZZ.Tools.DataBaseSupport.GetLibraryFromSQL(System.String,System.Boolean)">
-            <summary>
-            查找所有可以执行语句的数据库
-            （暂时不能匹配from table1,table2 格式）
-            </summary>
-            <param name="sql">要执行的SQL语句</param>
-            <param name="containsData">是否必须含有数据</param>
-            <returns></returns>
-        </member>
         <member name="T:XYZZ.Tools.DataCheck">
             <summary>
             数据合法性验证
