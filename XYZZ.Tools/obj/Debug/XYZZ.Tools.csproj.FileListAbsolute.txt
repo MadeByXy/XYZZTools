@@ -11,3 +11,4 @@ E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Tools\bin\Debug\XYZZ.Tools.pdb
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Tools\bin\Debug\Newtonsoft.Json.dll
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Tools\obj\Debug\XYZZ.Tools.dll
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Tools\obj\Debug\XYZZ.Tools.pdb
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Tools\obj\Debug\XYZZ.Tools.csprojResolveAssemblyReference.cache

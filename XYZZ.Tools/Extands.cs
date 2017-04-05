@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Reflection;
 
 namespace XYZZ.Tools
 {
     /// <summary>
     /// 扩展方法
     /// </summary>
-    public static class Extands
+    public static partial class Extands
     {
         /// <summary>
         /// 获取范围区间的值
@@ -100,6 +102,8 @@ namespace XYZZ.Tools
                 case nameof(String):
                     nonEmpty = !string.IsNullOrEmpty(value.ToString());
                     return allowEmpty || nonEmpty ? (T)(object)value.ToString() : defaultValue;
+                case nameof(JObject):
+                    return (T)(object)ToJson(value);
                 default:
                     object[] param = new object[] { value.ToString(), default(T) };
                     var Method = typeof(T).GetMethod("TryParse", new Type[] {
@@ -116,6 +120,36 @@ namespace XYZZ.Tools
                     {
                         return defaultValue;
                     }
+            }
+        }
+
+        /// <summary>
+        /// 安全转换
+        /// </summary>
+        /// <param name="value">目标值</param>
+        /// <param name="type">目标类型</param>
+        /// <returns></returns>
+        public static object SafeParse(this object value, Type type)
+        {
+            if (value == null)
+            {
+                return value;
+            }
+            switch (type.Name)
+            {
+                case "String":
+                    return value.ToString();
+                default:
+                    object[] param = new object[] { value.ToString(), DefaultValue(type) };
+                    var Method = type.GetMethod("TryParse", new Type[] {
+                        typeof(string),
+                        type.MakeByRefType()
+                    });
+                    if (Method != null)
+                    {
+                        Method.Invoke(null, param);
+                    }
+                    return param[1];
             }
         }
     }
