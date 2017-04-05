@@ -1,5 +1,6 @@
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\bin\Debug\XYZZ.Library.XML
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\bin\Debug\XYZZ.Library.dll
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\bin\Debug\XYZZ.Library.pdb
+E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\obj\Debug\XYZZ.Library.csprojResolveAssemblyReference.cache
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\obj\Debug\XYZZ.Library.dll
 E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\obj\Debug\XYZZ.Library.pdb
-E:\小雨制造\XYZZ.Tools\XYZZTools\XYZZ.Library\bin\Debug\XYZZ.Library.XML

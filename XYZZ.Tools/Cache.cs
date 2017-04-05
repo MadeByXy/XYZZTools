@@ -18,7 +18,7 @@ namespace XYZZ.Tools
         private static string FileName = "Cache.txt";
         private static string FilePath = Environment.CurrentDirectory + @"\Plugins\";
         private static MemoryCache MemoryCache = new MemoryCache(CacheName);
-        private static DateTimeOffset DestroyTime = DateTimeOffset.Now.AddMonths(1);
+        private static DateTimeOffset DestroyTime { get { return DateTimeOffset.Now.AddMonths(1); } }
         private static Timer Timer = new Timer();
         /// <summary>
         /// <see cref="Cache"/>的实例
@@ -101,23 +101,23 @@ namespace XYZZ.Tools
         {
             Timer.Stop();
             await Task.Run(() =>
-          {
-              try
-              {
-                  using (FileStream cacheStream = new FileInfo(FilePath + FileName).Open(FileMode.Create))
-                  {
-                      JObject jObject = new JObject();
-                      foreach (var item in MemoryCache)
-                      {
-                          jObject.Add(item.Key, item.Value.ToString());
-                      }
-                      byte[] requestBytes = Encoding.UTF8.GetBytes(Encrypt(jObject.ToString()));
-                      cacheStream.Write(requestBytes, 0, requestBytes.Length);
-                      cacheStream.Close();
-                  }
-              }
-              catch { }
-          });
+            {
+                try
+                {
+                    using (FileStream cacheStream = new FileInfo(FilePath + FileName).Open(FileMode.Create))
+                    {
+                        JObject jObject = new JObject();
+                        foreach (var item in MemoryCache)
+                        {
+                            jObject.Add(item.Key, item.Value.ToString());
+                        }
+                        byte[] requestBytes = Encoding.UTF8.GetBytes(Encrypt(jObject.ToString()));
+                        cacheStream.Write(requestBytes, 0, requestBytes.Length);
+                        cacheStream.Close();
+                    }
+                }
+                catch { }
+            });
         }
 
         /// <summary>

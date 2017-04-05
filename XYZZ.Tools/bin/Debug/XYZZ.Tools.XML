@@ -14,6 +14,12 @@
             <see cref="T:XYZZ.Tools.Cache"/>的实例
             </summary>
         </member>
+        <member name="M:XYZZ.Tools.Cache.#ctor(System.String)">
+            <summary>
+            实例化缓存
+            </summary>
+            <param name="fileName">文件名称</param>
+        </member>
         <member name="M:XYZZ.Tools.Cache.Set(System.String,System.String)">
             <summary>
             设置缓存

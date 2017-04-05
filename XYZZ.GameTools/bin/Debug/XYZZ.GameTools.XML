@@ -226,17 +226,24 @@
             原始属性值
             </summary>
         </member>
-        <member name="M:XYZZ.GameTools.Instance.ValueProperty.Buff(System.Double)">
+        <member name="M:XYZZ.GameTools.Instance.ValueProperty.Buff(System.Int32)">
             <summary>
             永久增益
             </summary>
             <param name="addedValue">增益值</param>
         </member>
-        <member name="M:XYZZ.GameTools.Instance.ValueProperty.Buff(System.Double,System.Int32)">
+        <member name="M:XYZZ.GameTools.Instance.ValueProperty.Buff(System.Int32,System.Int32)">
             <summary>
             限时增益
             </summary>
             <param name="addedValue">增益值</param>
+            <param name="millisecond">增益时间</param>
+        </member>
+        <member name="M:XYZZ.GameTools.Instance.ValueProperty.Buff(System.Double,System.Int32)">
+            <summary>
+            限时增益
+            </summary>
+            <param name="addValue">增益半分比</param>
             <param name="millisecond">增益时间</param>
         </member>
         <member name="M:XYZZ.GameTools.Instance.ValueProperty.Clear(XYZZ.GameTools.ClearModeEnum)">
