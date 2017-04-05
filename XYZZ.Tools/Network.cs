@@ -44,11 +44,15 @@ namespace XYZZ.Tools
         public static string GetHtml(string url, Dictionary<string, string> parameters, HttpMethod method = HttpMethod.GET, SubmitMethod submitMethod = SubmitMethod.FORM)
         {
             HttpWebRequest request;
+            parameters = parameters ?? new Dictionary<string, string>();
             string param = string.Join("&", parameters.Select(x => string.Format("{0}={1}", x.Key, HttpUtility.HtmlEncode(x.Value.Replace("\r\n", "")))));
             switch (method)
             {
                 case HttpMethod.GET:
-                    url += "?" + param;
+                    if (param != "")
+                    {
+                        url += "?" + param;
+                    }
                     request = (HttpWebRequest)WebRequest.Create(url);
                     request.Method = method.ToString();
                     request.ContentType = "application/x-www-form-urlencoded";
