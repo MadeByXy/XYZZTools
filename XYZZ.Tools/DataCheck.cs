@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 #pragma warning disable 1591
@@ -31,10 +30,10 @@ namespace XYZZ.Tools
             {
                 foreach (PropertyInfo property in parameter.GetType().GetProperties())
                 {
-                    foreach (Attribute checkAttribute in Attribute.GetCustomAttributes(property).OrderByDescending(x => ((ICheck)x).Order))
+                    foreach (Attribute checkAttribute in Attribute.GetCustomAttributes(property, typeof(CheckAttribute)))
                     {
                         string message = "";
-                        if (!((ICheck)checkAttribute).Check(property.GetValue(parameter), ref message))
+                        if (!((CheckAttribute)checkAttribute).Check(property.GetValue(parameter), ref message))
                         {
                             resultMessage = message;
                             return false;
@@ -75,17 +74,12 @@ namespace XYZZ.Tools
             bool Check(out string result);
         }
 
-        private interface ICheck
+        public abstract class CheckAttribute : Attribute
         {
-            /// <summary>
-            /// 调用顺序
-            /// 建议：区间检测设为0，格式检测设为1，非空检测设为2
-            /// </summary>
-            int Order { get; }
             /// <summary>
             /// 字段名称
             /// </summary>
-            string Name { get; set; }
+            public abstract string Name { get; set; }
 
             /// <summary>
             /// 验证数据是否合法
@@ -93,23 +87,23 @@ namespace XYZZ.Tools
             /// <param name="value">值</param>
             /// <param name="resultMessage">错误信息</param>
             /// <returns></returns>
-            bool Check(object value, ref string resultMessage);
+            public abstract bool Check(object value, ref string resultMessage);
         }
 
         /// <summary>
         /// 数字区间检测
         /// </summary>
-        public class NumberIntervalAttribute : Attribute, ICheck
+        public class NumberIntervalAttribute : CheckAttribute
         {
-            public string Name { get; set; }
+            public override string Name { get; set; }
             public int Order { get { return 0; } }
             public double Min { get; set; }
             public double Max { get; set; }
 
-            public bool Check(object value, ref string resultMessage)
+            public override bool Check(object value, ref string resultMessage)
             {
                 double realValue = double.Parse(value.ToString());
-                if (Min <= realValue && Max >= realValue)
+                if (value == null || Min <= realValue && Max >= realValue)
                 {
                     return true;
                 }
@@ -124,11 +118,11 @@ namespace XYZZ.Tools
         /// <summary>
         /// 时间区间检测
         /// </summary>
-        public class DateIntervalAttribute : Attribute, ICheck
+        public class DateIntervalAttribute : CheckAttribute
         {
             private string earliest, latest;
             public int Order { get { return 0; } }
-            public string Name { get; set; } = "日期";
+            public override string Name { get; set; } = "日期";
             private DateTime RarliestDate { get; set; }
             private DateTime LatestDate { get; set; }
             public string Earliest
@@ -150,9 +144,9 @@ namespace XYZZ.Tools
                 }
             }
 
-            public bool Check(object value, ref string resultMessage)
+            public override bool Check(object value, ref string resultMessage)
             {
-                if (RarliestDate <= (DateTime)value && LatestDate >= (DateTime)value)
+                if (value == null || RarliestDate <= (DateTime)value && LatestDate >= (DateTime)value)
                 {
                     return true;
                 }
@@ -167,20 +161,23 @@ namespace XYZZ.Tools
         /// <summary>
         /// 时间格式检测
         /// </summary>
-        public class DateAttribute : Attribute, ICheck
+        public class DateAttribute : CheckAttribute
         {
-            public string Name { get; set; }
+            public override string Name { get; set; }
             public int Order { get { return 1; } }
             /// <summary>
             /// 允许的时间格式
             /// </summary>
             public string[] Format { get; set; }
 
-            public bool Check(object value, ref string resultMessage)
+            public override bool Check(object value, ref string resultMessage)
             {
                 try
                 {
-                    DateTime.ParseExact(value.ToString(), Format, null, DateTimeStyles.None);
+                    if (value != null)
+                    {
+                        DateTime.ParseExact(value.ToString(), Format, null, DateTimeStyles.None);
+                    }
                     return true;
                 }
                 catch
@@ -194,13 +191,13 @@ namespace XYZZ.Tools
         /// <summary>
         /// Email格式检测
         /// </summary>
-        public class EmailAttribute : Attribute, ICheck
+        public class EmailAttribute : CheckAttribute
         {
-            public string Name { get; set; } = "邮箱";
+            public override string Name { get; set; } = "邮箱";
             public int Order { get { return 1; } }
-            public bool Check(object value, ref string resultMessage)
+            public override bool Check(object value, ref string resultMessage)
             {
-                if (Regex.IsMatch(value.ToString(), @"[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?"))
+                if (value == null || Regex.IsMatch(value.ToString(), @"[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?"))
                 {
                     return true;
                 }
@@ -215,14 +212,14 @@ namespace XYZZ.Tools
         /// <summary>
         /// 枚举类型检测
         /// </summary>
-        public class EnumAttribute : Attribute, ICheck
+        public class EnumAttribute : CheckAttribute
         {
-            public string Name { get; set; }
+            public override string Name { get; set; }
             public int Order { get { return 1; } }
             public Type EnumType { get; set; }
-            public bool Check(object value, ref string resultMessage)
+            public override bool Check(object value, ref string resultMessage)
             {
-                if (Enum.IsDefined(EnumType, value))
+                if (value == null || Enum.IsDefined(EnumType, value))
                 {
                     return true;
                 }
@@ -237,11 +234,11 @@ namespace XYZZ.Tools
         /// <summary>
         /// 非空检测
         /// </summary>
-        public class NonNullAttribute : Attribute, ICheck
+        public class NonNullAttribute : CheckAttribute
         {
-            public string Name { get; set; }
+            public override string Name { get; set; }
             public int Order { get { return 2; } }
-            public bool Check(object value, ref string resultMessage)
+            public override bool Check(object value, ref string resultMessage)
             {
                 if (value != null)
                 {

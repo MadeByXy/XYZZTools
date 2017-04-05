@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
-using System.Timers;
 using Config = System.Configuration.ConfigurationSettings;
 #pragma warning disable 0618
 
@@ -14,68 +14,80 @@ namespace XYZZ.Library
     /// </summary>
     public class DataBase
     {
-        private enum DataBaseType
+        private enum DataBaseEnum
         {
             SqlServer,
             Oracle
         }
-        private static DataBaseType dataBaseType { get; set; }
-        private static DbConnection Conn;
+        private DataBaseEnum DataBaseType { get; set; }
         /// <summary>
         /// 数据库连接字段
         /// </summary>
-        private static string ConnectionString { get; set; }
-        private static Timer SwitchTimer { get; set; }
-        private static void SetConn(string connectionString)
+        private string ConnectionString { get; set; }
+
+        /// <summary>
+        /// 当前线程名称
+        /// </summary>
+        private static string CurrentThreadName
         {
-            try
-            {
-                Conn = new SqlConnection(connectionString);
-                dataBaseType = DataBaseType.SqlServer;
-                return;
-            }
-            catch { }
-            try
-            {
-                Conn = new OleDbConnection(connectionString);
-                dataBaseType = DataBaseType.Oracle;
-                return;
-            }
-            catch { }
+            get { return System.Threading.Thread.CurrentThread.Name ?? ""; }
         }
 
         /// <summary>
         /// <see cref="DataBase"/>的实例
         /// </summary>
-        public static DataBase Instance = new DataBase();
+        public static readonly DataBase Instance = new DataBase();
+        /// <summary>
+        /// <see cref="DataBase"/>的线程实例
+        /// </summary>
+        private static Dictionary<string, DataBase> ThreadDic = new Dictionary<string, DataBase>();
 
         private DataBase()
         {
+            new DataBase(Config.AppSettings["ConnectionString"]);
+        }
+
+        private DataBase(string connectionString)
+        {
+            ConnectionString = connectionString;
             try
             {
-                ConnectionString = Config.AppSettings["ConnectionString"];
-                SetConn(ConnectionString);
-
-                //延迟关闭，避免多次重复开关数据库
-                SwitchTimer = new Timer()
-                {
-                    Interval = 1000,
-                    AutoReset = false
-                };
-                SwitchTimer.Elapsed += new ElapsedEventHandler((object sender, ElapsedEventArgs e) => { Close(); });
+                new SqlConnection(connectionString);
+                DataBaseType = DataBaseEnum.SqlServer;
+                return;
             }
             catch { }
+            try
+            {
+                new OleDbConnection(connectionString);
+                DataBaseType = DataBaseEnum.Oracle;
+                return;
+            }
+            catch { }
+            throw new Exception("不正确的数据库连接字段");
         }
 
-        private static void TimerStart()
+        /// <summary>
+        /// 添加线程实例
+        /// </summary>
+        /// <param name="connectionString">数据库连接参数</param>
+        public static void SetThreadInstance(string connectionString)
         {
-            SwitchTimer.Start();
+            lock (ThreadDic)
+            {
+                if (!ThreadDic.ContainsKey(CurrentThreadName))
+                {
+                    ThreadDic.Add(CurrentThreadName, new DataBase(connectionString));
+                }
+            }
         }
 
-        private static void TimerStop()
+        /// <summary>
+        /// 清除线程实例
+        /// </summary>
+        public static void RemoveThreadInstance()
         {
-            SwitchTimer.Stop();
-            Open();
+            ThreadDic.Remove(CurrentThreadName);
         }
 
         /// <summary>
@@ -135,63 +147,76 @@ namespace XYZZ.Library
 
         private static DataTable GetDataTable(string sql)
         {
-            try
+            if (ThreadDic.ContainsKey(CurrentThreadName))
             {
-                TimerStop();
-                DbCommand dbCommand = Conn.CreateCommand();
-                dbCommand.CommandText = sql;
-                DataTable dataTable = new DataTable();
-                switch (dataBaseType)
-                {
-                    case DataBaseType.Oracle:
-                        new OleDbDataAdapter((OleDbCommand)dbCommand).Fill(dataTable);
-                        break;
-                    case DataBaseType.SqlServer:
-                        new SqlDataAdapter((SqlCommand)dbCommand).Fill(dataTable);
-                        break;
-                }
-                TimerStart();
-                return dataTable;
+                return ThreadDic[CurrentThreadName].GetDataTableInstance(sql);
             }
-            catch (Exception e)
+            else
             {
-                Close();
-                throw e;
+                return Instance.GetDataTableInstance(sql);
             }
         }
 
         private static int ExcuteNonQuery(string sql)
         {
-            try
+            if (ThreadDic.ContainsKey(CurrentThreadName))
             {
-                TimerStop();
-                DbCommand dbCommand;
-                dbCommand = Conn.CreateCommand();
+                return ThreadDic[CurrentThreadName].ExcuteNonQueryInstance(sql);
+            }
+            else
+            {
+                return Instance.ExcuteNonQueryInstance(sql);
+            }
+        }
+
+        /// <summary>
+        /// 获取数据库连接
+        /// </summary>
+        private DbConnection GetConnection()
+        {
+            switch (DataBaseType)
+            {
+                case DataBaseEnum.SqlServer:
+                    return new SqlConnection(ConnectionString);
+                case DataBaseEnum.Oracle:
+                    return new OleDbConnection(ConnectionString);
+                default:
+                    return null;
+            }
+        }
+
+        private DataTable GetDataTableInstance(string sql)
+        {
+            using (DbConnection conn = GetConnection())
+            {
+                conn.Open();
+                DbCommand dbCommand = conn.CreateCommand();
+                dbCommand.CommandText = sql;
+                DataTable dataTable = new DataTable();
+                switch (DataBaseType)
+                {
+                    case DataBaseEnum.SqlServer:
+                        new SqlDataAdapter((SqlCommand)dbCommand).Fill(dataTable);
+                        break;
+                    case DataBaseEnum.Oracle:
+                        new OleDbDataAdapter((OleDbCommand)dbCommand).Fill(dataTable);
+                        break;
+                }
+                conn.Close();
+                return dataTable;
+            }
+        }
+
+        private int ExcuteNonQueryInstance(string sql)
+        {
+            using (DbConnection conn = GetConnection())
+            {
+                conn.Open();
+                DbCommand dbCommand = conn.CreateCommand();
                 dbCommand.CommandText = sql;
                 int result = dbCommand.ExecuteNonQuery();
-                TimerStart();
+                conn.Close();
                 return result;
-            }
-            catch (Exception e)
-            {
-                Close();
-                throw e;
-            }
-        }
-
-        private static void Open()
-        {
-            if (Conn.State != ConnectionState.Open)
-            {
-                Conn.Open();
-            }
-        }
-
-        private static void Close()
-        {
-            if (Conn.State != ConnectionState.Closed)
-            {
-                Conn.Close();
             }
         }
     }

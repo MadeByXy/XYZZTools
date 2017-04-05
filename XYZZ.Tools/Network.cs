@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
-using Newtonsoft.Json.Linq;
 #pragma warning disable 1591
 
 namespace XYZZ.Tools
@@ -78,12 +78,12 @@ namespace XYZZ.Tools
                     requestStream.Close();
                     break;
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException("不支持的请求类型");
             }
 
-            CookieContainer co = new CookieContainer();
-            co.SetCookies(new Uri(url), param);
-            request.CookieContainer = co;
+            CookieContainer cookie = new CookieContainer();
+            cookie.SetCookies(new Uri(url), param);
+            request.CookieContainer = cookie;
             request.Referer = url;
             request.Headers["charset"] = "UTF-8";
             request.Accept = "application/json";
@@ -96,13 +96,10 @@ namespace XYZZ.Tools
             request.Date = DateTime.Now;
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream stream = response.GetResponseStream();
-            string result = "", head = response.Headers.ToString();
-            StreamReader Reader = new StreamReader(stream, Encoding.UTF8);
-            result = Reader.ReadToEnd();
-            Reader.Close();
-            stream.Close();
-            return result;
+            using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding(response.CharacterSet)))
+            {
+                return reader.ReadToEnd();
+            }
         }
     }
 }
