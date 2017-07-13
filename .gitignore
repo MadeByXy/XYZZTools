@@ -1,0 +1,10 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/XYZZ.GameTools/bin/Debug
+/XYZZ.GameTools/obj/Debug
+/XYZZ.Library/bin/Debug
+/XYZZ.Library/obj/Debug
+/XYZZ.Tools/bin/Debug
+/XYZZ.Tools/obj/Debug
