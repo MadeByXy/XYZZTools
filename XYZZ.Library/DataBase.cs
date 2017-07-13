@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
+using System.Data.OracleClient;
 using System.Data.SqlClient;
+using System.Data.SQLite;
+using System.Reflection;
 using Config = System.Configuration.ConfigurationSettings;
 #pragma warning disable 0618
 
@@ -14,16 +17,16 @@ namespace XYZZ.Library
     /// </summary>
     public class DataBase
     {
-        private enum DataBaseEnum
-        {
-            SqlServer,
-            Oracle
-        }
-        private DataBaseEnum DataBaseType { get; set; }
+        #region  公共参数
         /// <summary>
-        /// 数据库连接字段
+        /// 当前数据库连接字段
         /// </summary>
         private string ConnectionString { get; set; }
+
+        /// <summary>
+        /// 当前数据库类型
+        /// </summary>
+        private Type DataBaseType { get; set; }
 
         /// <summary>
         /// 当前线程名称
@@ -36,34 +39,40 @@ namespace XYZZ.Library
         /// <summary>
         /// <see cref="DataBase"/>的实例
         /// </summary>
-        public static readonly DataBase Instance = new DataBase();
+        public static readonly DataBase Instance = new DataBase(Config.AppSettings["ConnectionString"]);
+
         /// <summary>
         /// <see cref="DataBase"/>的线程实例
         /// </summary>
         private static Dictionary<string, DataBase> ThreadDic = new Dictionary<string, DataBase>();
 
-        private DataBase()
-        {
-            new DataBase(Config.AppSettings["ConnectionString"]);
-        }
+        /// <summary>
+        /// 可加载的数据库类型
+        /// </summary>
+        private static Dictionary<Type, Type> LibraryList;
+        #endregion
 
         private DataBase(string connectionString)
         {
+            if (LibraryList == null)
+            {
+                LibraryList = new Dictionary<Type, Type>() {
+                    { typeof(SqlConnection) ,typeof(SqlDataAdapter)},
+                    { typeof(OleDbConnection),typeof(OleDbDataAdapter)},
+                    { typeof(OracleConnection),typeof(OracleDataAdapter)},
+                    { typeof(SQLiteConnection),typeof(SQLiteDataAdapter)} };
+            }
             ConnectionString = connectionString;
-            try
+            foreach (Type type in LibraryList.Keys)
             {
-                new SqlConnection(connectionString);
-                DataBaseType = DataBaseEnum.SqlServer;
-                return;
+                try
+                {
+                    Activator.CreateInstance(type, connectionString);
+                    DataBaseType = type;
+                    return;
+                }
+                catch { }
             }
-            catch { }
-            try
-            {
-                new OleDbConnection(connectionString);
-                DataBaseType = DataBaseEnum.Oracle;
-                return;
-            }
-            catch { }
             throw new Exception("不正确的数据库连接字段");
         }
 
@@ -90,6 +99,7 @@ namespace XYZZ.Library
             ThreadDic.Remove(CurrentThreadName);
         }
 
+        #region  执行SQL
         /// <summary>
         /// 执行SQL，并返回指定类型的结果
         /// <para>T类型说明：</para>
@@ -100,39 +110,76 @@ namespace XYZZ.Library
         /// </summary>
         public static T ExecuteSql<T>(string sql, params object[] args)
         {
-            sql = string.Format(sql, args);
-            DataTable tempDataTable;
-            switch (typeof(T).Name)
+            try
             {
-                case nameof(String):
-                    tempDataTable = GetDataTable(sql);
-                    return (T)(object)(tempDataTable == null || tempDataTable.Rows.Count == 0 ? "" : tempDataTable.Rows[0][0].ToString());
-                case nameof(Int32):
-                    if (sql.Split(' ')[0].ToLower() == "select")
-                    {
-                        tempDataTable = GetDataTable(sql);
-                        return (T)(object)(tempDataTable == null ? 0 : tempDataTable.Rows.Count);
-                    }
-                    else
-                    {
-                        return (T)(object)ExcuteNonQuery(sql);
-                    }
-                case nameof(DataTable):
-                    return (T)(object)GetDataTable(sql);
-                case nameof(Decimal):
-                    return (T)(object)Convert.ToDecimal(ExecuteSql<string>(sql));
-                case nameof(Boolean):
-                    if (sql.Split(' ')[0].ToLower() == "select")
-                    {
-                        tempDataTable = GetDataTable(sql);
-                        return (T)(object)(tempDataTable == null ? false : tempDataTable.Rows.Count != 0);
-                    }
-                    else
-                    {
-                        return (T)(object)(ExcuteNonQuery(sql) > 0);
-                    }
-                default:
+                sql = string.Format(sql, args);
+                MethodInfo method = typeof(DataBase).GetMethod(string.Format("ExecuteSql_{0}", typeof(T).Name), BindingFlags.Static | BindingFlags.NonPublic);
+                if (method != null)
+                {
+                    return (T)method.Invoke(null, new object[] { sql });
+                }
+                else
+                {
                     return default(T);
+                }
+            }
+            catch { throw; }
+        }
+
+        /// <summary>
+        /// 返回第一项数据
+        /// </summary>
+        private static string ExecuteSql_String(string sql)
+        {
+            DataTable dataTable = GetDataTable(sql);
+            return dataTable == null || dataTable.Rows.Count == 0 ? "" : dataTable.Rows[0][0].ToString();
+        }
+
+        /// <summary>
+        /// 返回第一项数据
+        /// </summary>
+        private static decimal ExecuteSql_Decimal(string sql)
+        {
+            return Convert.ToDecimal(ExecuteSql_String(sql));
+        }
+
+        /// <summary>
+        /// 返回查询结果
+        /// </summary>
+        private static DataTable ExecuteSql_DataTable(string sql)
+        {
+            return GetDataTable(sql);
+        }
+
+        /// <summary>
+        /// 查询返回查询行数，其余返回受影响的行数
+        /// </summary>
+        private static int ExecuteSql_Int32(string sql)
+        {
+            if (sql.Split(' ')[0].ToLower() == "select")
+            {
+                DataTable dataTable = GetDataTable(sql);
+                return dataTable == null ? 0 : dataTable.Rows.Count;
+            }
+            else
+            {
+                return ExcuteNonQuery(sql);
+            }
+        }
+
+        /// <summary>
+        /// 查询返回是否存在目标，其余返回是否存在受影响行
+        /// </summary>
+        private static bool ExecuteSql_Boolean(string sql)
+        {
+            if (sql.Split(' ')[0].ToLower() == "select")
+            {
+                DataTable dataTable = GetDataTable(sql);
+                return dataTable == null ? false : dataTable.Rows.Count != 0;
+            }
+            else
+            {
+                return ExcuteNonQuery(sql) > 0;
             }
         }
 
@@ -144,7 +191,9 @@ namespace XYZZ.Library
             sql = string.Format(sql, args);
             ExcuteNonQuery(sql);
         }
+        #endregion
 
+        #region  内部实现
         private static DataTable GetDataTable(string sql)
         {
             if (ThreadDic.ContainsKey(CurrentThreadName))
@@ -169,39 +218,15 @@ namespace XYZZ.Library
             }
         }
 
-        /// <summary>
-        /// 获取数据库连接
-        /// </summary>
-        private DbConnection GetConnection()
-        {
-            switch (DataBaseType)
-            {
-                case DataBaseEnum.SqlServer:
-                    return new SqlConnection(ConnectionString);
-                case DataBaseEnum.Oracle:
-                    return new OleDbConnection(ConnectionString);
-                default:
-                    return null;
-            }
-        }
-
         private DataTable GetDataTableInstance(string sql)
         {
-            using (DbConnection conn = GetConnection())
+            using (DbConnection conn = (DbConnection)Activator.CreateInstance(DataBaseType, ConnectionString))
             {
                 conn.Open();
-                DbCommand dbCommand = conn.CreateCommand();
-                dbCommand.CommandText = sql;
+                DbCommand command = conn.CreateCommand();
+                command.CommandText = sql;
                 DataTable dataTable = new DataTable();
-                switch (DataBaseType)
-                {
-                    case DataBaseEnum.SqlServer:
-                        new SqlDataAdapter((SqlCommand)dbCommand).Fill(dataTable);
-                        break;
-                    case DataBaseEnum.Oracle:
-                        new OleDbDataAdapter((OleDbCommand)dbCommand).Fill(dataTable);
-                        break;
-                }
+                ((DbDataAdapter)Activator.CreateInstance(LibraryList[DataBaseType], command)).Fill(dataTable);
                 conn.Close();
                 return dataTable;
             }
@@ -209,15 +234,16 @@ namespace XYZZ.Library
 
         private int ExcuteNonQueryInstance(string sql)
         {
-            using (DbConnection conn = GetConnection())
+            using (DbConnection conn = (DbConnection)Activator.CreateInstance(DataBaseType, ConnectionString))
             {
                 conn.Open();
-                DbCommand dbCommand = conn.CreateCommand();
-                dbCommand.CommandText = sql;
-                int result = dbCommand.ExecuteNonQuery();
+                DbCommand conmand = conn.CreateCommand();
+                conmand.CommandText = sql;
+                int result = conmand.ExecuteNonQuery();
                 conn.Close();
                 return result;
             }
         }
+        #endregion
     }
 }
