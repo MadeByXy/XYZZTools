@@ -108,7 +108,7 @@ namespace XYZZ.Library
         /// <para><see cref="DataTable"/>：返回查询结果</para>
         /// <para><see cref="bool"/>：查询返回是否存在目标，其余返回是否存在受影响行</para>
         /// </summary>
-        public static T ExecuteSql<T>(string sql, params DbParameter[] parameters)
+        public static T ExecuteSql<T>(string sql, params Parameter[] parameters)
         {
             MethodInfo method = typeof(DataBase).GetMethod(string.Format("ExecuteSql_{0}", typeof(T).Name), BindingFlags.Static | BindingFlags.NonPublic);
             if (method != null)
@@ -124,7 +124,7 @@ namespace XYZZ.Library
         /// <summary>
         /// 返回第一项数据
         /// </summary>
-        private static string ExecuteSql_String(string sql, params DbParameter[] parameters)
+        private static string ExecuteSql_String(string sql, params Parameter[] parameters)
         {
             DataTable dataTable = GetDataTable(sql, parameters);
             return dataTable == null || dataTable.Rows.Count == 0 ? "" : dataTable.Rows[0][0].ToString();
@@ -133,7 +133,7 @@ namespace XYZZ.Library
         /// <summary>
         /// 返回第一项数据
         /// </summary>
-        private static decimal ExecuteSql_Decimal(string sql, params DbParameter[] parameters)
+        private static decimal ExecuteSql_Decimal(string sql, params Parameter[] parameters)
         {
             return Convert.ToDecimal(ExecuteSql_String(sql, parameters));
         }
@@ -141,7 +141,7 @@ namespace XYZZ.Library
         /// <summary>
         /// 返回查询结果
         /// </summary>
-        private static DataTable ExecuteSql_DataTable(string sql, params DbParameter[] parameters)
+        private static DataTable ExecuteSql_DataTable(string sql, params Parameter[] parameters)
         {
             return GetDataTable(sql, parameters);
         }
@@ -149,7 +149,7 @@ namespace XYZZ.Library
         /// <summary>
         /// 查询返回查询行数，其余返回受影响的行数
         /// </summary>
-        private static int ExecuteSql_Int32(string sql, params DbParameter[] parameters)
+        private static int ExecuteSql_Int32(string sql, params Parameter[] parameters)
         {
             if (sql.Split(' ')[0].ToLower() == "select")
             {
@@ -165,7 +165,7 @@ namespace XYZZ.Library
         /// <summary>
         /// 查询返回是否存在目标，其余返回是否存在受影响行
         /// </summary>
-        private static bool ExecuteSql_Boolean(string sql, params DbParameter[] parameters)
+        private static bool ExecuteSql_Boolean(string sql, params Parameter[] parameters)
         {
             if (sql.Split(' ')[0].ToLower() == "select")
             {
@@ -181,14 +181,14 @@ namespace XYZZ.Library
         /// <summary>
         /// 执行SQL
         /// </summary>
-        public static void ExecuteSql(string sql, params DbParameter[] parameters)
+        public static void ExecuteSql(string sql, params Parameter[] parameters)
         {
             ExcuteNonQuery(sql, parameters);
         }
         #endregion
 
         #region  内部实现
-        private static DataTable GetDataTable(string sql, params DbParameter[] parameters)
+        private static DataTable GetDataTable(string sql, params Parameter[] parameters)
         {
             if (ThreadDic.ContainsKey(CurrentThreadName))
             {
@@ -200,7 +200,7 @@ namespace XYZZ.Library
             }
         }
 
-        private static int ExcuteNonQuery(string sql, params DbParameter[] parameters)
+        private static int ExcuteNonQuery(string sql, params Parameter[] parameters)
         {
             if (ThreadDic.ContainsKey(CurrentThreadName))
             {
@@ -212,14 +212,20 @@ namespace XYZZ.Library
             }
         }
 
-        private DataTable GetDataTableInstance(string sql, params DbParameter[] parameters)
+        private DataTable GetDataTableInstance(string sql, params Parameter[] parameters)
         {
             using (DbConnection conn = (DbConnection)Activator.CreateInstance(DataBaseType, ConnectionString))
             {
                 conn.Open();
                 DbCommand command = conn.CreateCommand();
                 command.CommandText = sql;
-                command.Parameters.AddRange(parameters);
+                foreach (Parameter parameter in parameters)
+                {
+                    DbParameter par = command.CreateParameter();
+                    par.ParameterName = parameter.Name;
+                    par.Value = parameter.Value;
+                    command.Parameters.Add(par);
+                }
 
                 DataTable dataTable = new DataTable();
                 ((DbDataAdapter)Activator.CreateInstance(LibraryList[DataBaseType], command)).Fill(dataTable);
@@ -228,14 +234,20 @@ namespace XYZZ.Library
             }
         }
 
-        private int ExcuteNonQueryInstance(string sql, params DbParameter[] parameters)
+        private int ExcuteNonQueryInstance(string sql, params Parameter[] parameters)
         {
             using (DbConnection conn = (DbConnection)Activator.CreateInstance(DataBaseType, ConnectionString))
             {
                 conn.Open();
                 DbCommand command = conn.CreateCommand();
                 command.CommandText = sql;
-                command.Parameters.AddRange(parameters);
+                foreach (Parameter parameter in parameters)
+                {
+                    DbParameter par = command.CreateParameter();
+                    par.ParameterName = parameter.Name;
+                    par.Value = parameter.Value;
+                    command.Parameters.Add(par);
+                }
 
                 int result = command.ExecuteNonQuery();
                 conn.Close();

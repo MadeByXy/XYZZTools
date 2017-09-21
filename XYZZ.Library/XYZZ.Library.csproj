@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="DataBase.cs" />
     <Compile Include="DataBaseSupport.cs" />
+    <Compile Include="Parameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
