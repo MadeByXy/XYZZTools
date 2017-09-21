@@ -22,7 +22,7 @@ namespace XYZZ.Library
             {
                 try
                 {
-                    if (DataBase.ExecuteSql<bool>("select 1 from {0}.{1}", row[0], tableName) || !containsData)
+                    if (DataBase.ExecuteSql<bool>(string.Format("select 1 from {0}.{1}", row[0], tableName)) || !containsData)
                     {
                         libraryList.Add(row[0].ToString());
                     }

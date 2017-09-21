@@ -60,6 +60,7 @@
     <Compile Include="Extands.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Network.cs" />
+    <Compile Include="Parameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

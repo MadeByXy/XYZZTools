@@ -152,5 +152,19 @@ namespace XYZZ.Tools
                     return param[1];
             }
         }
+
+        /// <summary>
+        /// 格式化字符串
+        /// </summary>
+        /// <param name="text">待格式化字符串</param>
+        /// <param name="parameters">格式化信息</param>
+        public static string Format(this string text, params Parameter[] parameters)
+        {
+            foreach (Parameter parameter in parameters)
+            {
+                text = text.Replace(string.Format("{{{0}}}", parameter.Name), parameter.Value.ToString());
+            }
+            return text;
+        }
     }
 }

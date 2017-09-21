@@ -108,123 +108,119 @@ namespace XYZZ.Library
         /// <para><see cref="DataTable"/>：返回查询结果</para>
         /// <para><see cref="bool"/>：查询返回是否存在目标，其余返回是否存在受影响行</para>
         /// </summary>
-        public static T ExecuteSql<T>(string sql, params object[] args)
+        public static T ExecuteSql<T>(string sql, params DbParameter[] parameters)
         {
-            try
+            MethodInfo method = typeof(DataBase).GetMethod(string.Format("ExecuteSql_{0}", typeof(T).Name), BindingFlags.Static | BindingFlags.NonPublic);
+            if (method != null)
             {
-                sql = string.Format(sql, args);
-                MethodInfo method = typeof(DataBase).GetMethod(string.Format("ExecuteSql_{0}", typeof(T).Name), BindingFlags.Static | BindingFlags.NonPublic);
-                if (method != null)
-                {
-                    return (T)method.Invoke(null, new object[] { sql });
-                }
-                else
-                {
-                    return default(T);
-                }
+                return (T)method.Invoke(null, new object[] { sql, parameters });
             }
-            catch { throw; }
+            else
+            {
+                return default(T);
+            }
         }
 
         /// <summary>
         /// 返回第一项数据
         /// </summary>
-        private static string ExecuteSql_String(string sql)
+        private static string ExecuteSql_String(string sql, params DbParameter[] parameters)
         {
-            DataTable dataTable = GetDataTable(sql);
+            DataTable dataTable = GetDataTable(sql, parameters);
             return dataTable == null || dataTable.Rows.Count == 0 ? "" : dataTable.Rows[0][0].ToString();
         }
 
         /// <summary>
         /// 返回第一项数据
         /// </summary>
-        private static decimal ExecuteSql_Decimal(string sql)
+        private static decimal ExecuteSql_Decimal(string sql, params DbParameter[] parameters)
         {
-            return Convert.ToDecimal(ExecuteSql_String(sql));
+            return Convert.ToDecimal(ExecuteSql_String(sql, parameters));
         }
 
         /// <summary>
         /// 返回查询结果
         /// </summary>
-        private static DataTable ExecuteSql_DataTable(string sql)
+        private static DataTable ExecuteSql_DataTable(string sql, params DbParameter[] parameters)
         {
-            return GetDataTable(sql);
+            return GetDataTable(sql, parameters);
         }
 
         /// <summary>
         /// 查询返回查询行数，其余返回受影响的行数
         /// </summary>
-        private static int ExecuteSql_Int32(string sql)
+        private static int ExecuteSql_Int32(string sql, params DbParameter[] parameters)
         {
             if (sql.Split(' ')[0].ToLower() == "select")
             {
-                DataTable dataTable = GetDataTable(sql);
+                DataTable dataTable = GetDataTable(sql, parameters);
                 return dataTable == null ? 0 : dataTable.Rows.Count;
             }
             else
             {
-                return ExcuteNonQuery(sql);
+                return ExcuteNonQuery(sql, parameters);
             }
         }
 
         /// <summary>
         /// 查询返回是否存在目标，其余返回是否存在受影响行
         /// </summary>
-        private static bool ExecuteSql_Boolean(string sql)
+        private static bool ExecuteSql_Boolean(string sql, params DbParameter[] parameters)
         {
             if (sql.Split(' ')[0].ToLower() == "select")
             {
-                DataTable dataTable = GetDataTable(sql);
+                DataTable dataTable = GetDataTable(sql, parameters);
                 return dataTable == null ? false : dataTable.Rows.Count != 0;
             }
             else
             {
-                return ExcuteNonQuery(sql) > 0;
+                return ExcuteNonQuery(sql, parameters) > 0;
             }
         }
 
         /// <summary>
         /// 执行SQL
         /// </summary>
-        public static void ExecuteSql(string sql, params object[] args)
+        public static void ExecuteSql(string sql, params DbParameter[] parameters)
         {
-            sql = string.Format(sql, args);
-            ExcuteNonQuery(sql);
+            ExcuteNonQuery(sql, parameters);
         }
         #endregion
 
         #region  内部实现
-        private static DataTable GetDataTable(string sql)
+        private static DataTable GetDataTable(string sql, params DbParameter[] parameters)
         {
             if (ThreadDic.ContainsKey(CurrentThreadName))
             {
-                return ThreadDic[CurrentThreadName].GetDataTableInstance(sql);
+                return ThreadDic[CurrentThreadName].GetDataTableInstance(sql, parameters);
             }
             else
             {
-                return Instance.GetDataTableInstance(sql);
+                return Instance.GetDataTableInstance(sql, parameters);
             }
         }
 
-        private static int ExcuteNonQuery(string sql)
+        private static int ExcuteNonQuery(string sql, params DbParameter[] parameters)
         {
             if (ThreadDic.ContainsKey(CurrentThreadName))
             {
-                return ThreadDic[CurrentThreadName].ExcuteNonQueryInstance(sql);
+                return ThreadDic[CurrentThreadName].ExcuteNonQueryInstance(sql, parameters);
             }
             else
             {
-                return Instance.ExcuteNonQueryInstance(sql);
+                return Instance.ExcuteNonQueryInstance(sql, parameters);
             }
         }
 
-        private DataTable GetDataTableInstance(string sql)
+        private DataTable GetDataTableInstance(string sql, params DbParameter[] parameters)
         {
             using (DbConnection conn = (DbConnection)Activator.CreateInstance(DataBaseType, ConnectionString))
             {
                 conn.Open();
                 DbCommand command = conn.CreateCommand();
                 command.CommandText = sql;
+                command.Parameters.AddRange(parameters);
+
                 DataTable dataTable = new DataTable();
                 ((DbDataAdapter)Activator.CreateInstance(LibraryList[DataBaseType], command)).Fill(dataTable);
                 conn.Close();
@@ -232,14 +228,16 @@ namespace XYZZ.Library
             }
         }
 
-        private int ExcuteNonQueryInstance(string sql)
+        private int ExcuteNonQueryInstance(string sql, params DbParameter[] parameters)
         {
             using (DbConnection conn = (DbConnection)Activator.CreateInstance(DataBaseType, ConnectionString))
             {
                 conn.Open();
-                DbCommand conmand = conn.CreateCommand();
-                conmand.CommandText = sql;
-                int result = conmand.ExecuteNonQuery();
+                DbCommand command = conn.CreateCommand();
+                command.CommandText = sql;
+                command.Parameters.AddRange(parameters);
+
+                int result = command.ExecuteNonQuery();
                 conn.Close();
                 return result;
             }
